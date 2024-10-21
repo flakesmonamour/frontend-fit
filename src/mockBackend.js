@@ -3,7 +3,7 @@
 const USERS_KEY = 'fitnessTracker_users';
 const WORKOUTS_KEY = 'fitnessTracker_workouts';
 const GROUPS_KEY = 'fitnessTracker_groups';
-const GROUP_MEMBERSHIPS_KEY = 'fitnessTracker_groupMemberships';
+const GOALS_KEY = 'fitnessTracker_goals';
 
 // Helper function to get data from localStorage
 const getData = (key) => {
@@ -58,10 +58,10 @@ export const getAllGroups = () => {
 };
 
 export const joinGroup = (userId, groupId) => {
-  const memberships = getData(GROUP_MEMBERSHIPS_KEY);
+  const memberships = getData(GOALS_KEY);
   const newMembership = { id: Date.now(), userId, groupId };
   memberships.push(newMembership);
-  saveData(GROUP_MEMBERSHIPS_KEY, memberships);
+  saveData(GOALS_KEY, memberships);
 
   const groups = getData(GROUPS_KEY);
   const updatedGroups = groups.map(group => {
@@ -76,8 +76,34 @@ export const joinGroup = (userId, groupId) => {
 };
 
 export const getUserGroups = (userId) => {
-  const memberships = getData(GROUP_MEMBERSHIPS_KEY);
+  const memberships = getData(GOALS_KEY);
   const groups = getData(GROUPS_KEY);
   const userMemberships = memberships.filter(membership => membership.userId === userId);
   return userMemberships.map(membership => groups.find(group => group.id === membership.groupId));
+};
+
+// Goal functions
+export const addGoal = (userId, description, target, frequency) => {
+  const goals = getData(GOALS_KEY);
+  const newGoal = { id: Date.now(), userId, description, target, frequency, completed: false };
+  goals.push(newGoal);
+  saveData(GOALS_KEY, goals);
+  return newGoal;
+};
+
+export const getUserGoals = (userId) => {
+  const goals = getData(GOALS_KEY);
+  return goals.filter(goal => goal.userId === userId);
+};
+
+export const completeGoal = (goalId) => {
+  const goals = getData(GOALS_KEY);
+  const updatedGoals = goals.map(goal => {
+    if (goal.id === goalId) {
+      return { ...goal, completed: true };
+    }
+    return goal;
+  });
+  saveData(GOALS_KEY, updatedGoals);
+  return updatedGoals.find(goal => goal.id === goalId);
 };
